@@ -7,13 +7,21 @@
 #
 # Environment:
 #   MAX_PARALLEL=4        Max concurrent workers (default: 4)
+#   MODEL=claude-opus-4-6 Claude model for workers + reviewer (default: CLI default)
+#   TOOLS="Edit,Bash,Read" Allowed tools for workers (default: all)
 #   REVIEW_PROMPT=""      Custom instructions for the primary reviewer
 #   SKIP_REVIEW=1         Skip the primary review phase
 #   OUTPUT_DIR=...        Where worker results are saved
 
 set -euo pipefail
 
-MAX_PARALLEL="${MAX_PARALLEL:-4}"
+MAX_PARALLEL="${MAX_PARALLEL:-6}"
+MODEL="${MODEL:-}"
+MODEL_FLAG=""
+[[ -n "$MODEL" ]] && MODEL_FLAG="--model $MODEL"
+TOOLS="${TOOLS:-}"
+TOOLS_FLAG=""
+[[ -n "$TOOLS" ]] && TOOLS_FLAG="--allowedTools $TOOLS"
 OUTPUT_DIR="${OUTPUT_DIR:-.claude-workers-output}"
 REVIEW_PROMPT="${REVIEW_PROMPT:-}"
 SKIP_REVIEW="${SKIP_REVIEW:-0}"
@@ -48,7 +56,7 @@ run_worker() {
   local outfile="$OUTPUT_DIR/worker-${id}.md"
 
   echo "[worker $id] Starting: ${task:0:60}..."
-  claude -p "$task" --output-format text > "$outfile" 2>&1
+  claude -p "$task" $MODEL_FLAG $TOOLS_FLAG --output-format text > "$outfile" 2>&1
   echo "[worker $id] Done → $outfile"
 }
 
@@ -109,7 +117,7 @@ primary_prompt="${REVIEW_PROMPT:-$default_review}
 Here are the worker results to review:
 $review_input"
 
-claude -p "$primary_prompt" --output-format text | tee "$OUTPUT_DIR/primary-review.md"
+claude -p "$primary_prompt" $MODEL_FLAG $TOOLS_FLAG --output-format text | tee "$OUTPUT_DIR/primary-review.md"
 
 echo ""
 echo "═══ Done. Review saved to $OUTPUT_DIR/primary-review.md ═══"
