@@ -1,0 +1,9 @@
+# Phase 3: Integration & Validation (run AFTER Phase 2 is merged)
+# Run with: ./claude-workers.sh plans/scr-phase3-integrate.txt
+# Workers verify the full pipeline works end-to-end after gap fixes
+
+You are an INTEGRATION TESTER. Working in /Users/stevejoy/Developer/SCR. Run the full test suite with: cd /Users/stevejoy/Developer/SCR && python -m pytest tests/ -v. Report all failures. Then trace the complete pipeline manually: (1) Does calibrate_banister() output feed into generate_training_plan()? (2) Does build_run_analysis() apply WBGT correction? (3) Do taper/deload weeks appear in generated plans? (4) Does plan confidence display correctly? Report any broken connections.
+
+You are a PHYSIOLOGIST VALIDATOR. Working in /Users/stevejoy/Developer/SCR. Read the updated physiology.py, training_plan.py, and athlete_model.py. Verify that all changes from Phase 2 are physiologically sound: (1) Are calibrated Banister coefficients being applied correctly to VDOT forecasting? (2) Is the WBGT heat correction magnitude reasonable (check the quadratic penalty curve)? (3) Are taper volume reductions appropriate (50% final 2 weeks)? (4) Do deload weeks preserve enough stimulus? Write a validation report flagging anything that could produce unreasonable training recommendations.
+
+You are a STATISTICIAN VALIDATOR. Working in /Users/stevejoy/Developer/SCR. Read the updated pace_model.py, prediction.py, and physiology.py. Verify: (1) Are the confidence thresholds (R² 0.7/0.4) appropriate for this domain? (2) Is the calibration quality metric being computed on held-out data or in-sample? (3) Could overfitting occur with small run histories (<20 runs)? (4) Are there any numerical stability concerns (division by zero, log of negative, etc.)? Write a validation report.
